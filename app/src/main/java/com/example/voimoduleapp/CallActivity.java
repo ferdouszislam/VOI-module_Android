@@ -17,9 +17,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sinch.android.rtc.Sinch;
-import com.sinch.android.rtc.SinchClient;
-
 public class CallActivity extends AppCompatActivity implements CallView {
 
     private static final String TAG = "debug-main";
@@ -32,7 +29,7 @@ public class CallActivity extends AppCompatActivity implements CallView {
     }
 
     // permissions
-    private Permission permission;
+    private VoiPermission voiPermission;
     private static final String[] permissionStrings = {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.MODIFY_AUDIO_SETTINGS,
@@ -73,10 +70,10 @@ public class CallActivity extends AppCompatActivity implements CallView {
 
     private void promptPermission() {
 
-        permission = new Permission(this, permissionStrings, PERMISSION_CODE);
+        voiPermission = new VoiPermission(this, permissionStrings, PERMISSION_CODE);
 
-        if(!permission.checkPermissions())
-            permission.askPermissions();
+        if(!voiPermission.checkPermissions())
+            voiPermission.askPermissions();
 
     }
 
@@ -88,7 +85,9 @@ public class CallActivity extends AppCompatActivity implements CallView {
             case PERMISSION_CODE:
 
                 try {
-                    permission.resolvePermissions(permissions, grantResults);
+                    voiPermission.resolvePermissions(permissions, grantResults,
+                            "Permission required to make voice call.",
+                            true);
                 }catch (Exception e){
                     Log.d(TAG, "onRequestPermissionsResult: error = "+e.getMessage());
                 }
