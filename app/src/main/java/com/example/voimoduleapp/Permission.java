@@ -15,11 +15,13 @@ import java.util.List;
 import java.util.Map;
 
 public class Permission {
+    // this class is for handling permissions
 
     private static final String TAG = "permission-debug";
 
     private Activity activity;
 
+    // list of required permissions
     private String[] appPermissions;
 
     private int PERMISSION_REQUEST_CODE;
@@ -67,7 +69,6 @@ public class Permission {
     }
 
 
-
     public void askPermissions(){
         //ask for permission initially
 
@@ -88,7 +89,11 @@ public class Permission {
     }
 
 
-    public void resolvePermissions(String[] permissions, int[] grantResults){
+    public void resolvePermissions(String[] permissions, int[] grantResults,
+                                   String explanationMessage,
+                                   final boolean isPermissionAbsolutelyNecessary){
+        // ask permission if not granted
+        // show dialog box if not allowed chosen the first time
 
         HashMap<String, Integer> permissionResult = new HashMap<>();
 
@@ -103,14 +108,10 @@ public class Permission {
 
         if (!permissionResult.isEmpty()) {
 
-            String alertBoxMessage = "permission lagbe";
-
-            Log.d(TAG, "resolvePermissions: alert box message = " + alertBoxMessage);
-
             for (Map.Entry<String, Integer> entry : permissionResult.entrySet()) {
                 //request permission one by one with proper explanation
 
-                String permission = entry.getKey();
+                final String permission = entry.getKey();
                 int resultCode = entry.getValue();
                 Log.d(TAG, "resolvePermissions: permission = " + permission + " result code = " + resultCode);
 
@@ -119,7 +120,7 @@ public class Permission {
 
                     Permission.this.alertDialog(
 
-                            alertBoxMessage,
+                            explanationMessage,
 
                             //positive listener
                             new DialogInterface.OnClickListener() {
@@ -140,7 +141,9 @@ public class Permission {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
-                                    Permission.this.activity.finish();
+                                    // terminate the app if permission is absolutely necessary
+                                    if(isPermissionAbsolutelyNecessary)
+                                        Permission.this.activity.finish();
                                 }
                             }
 
@@ -149,7 +152,7 @@ public class Permission {
                 } else if(resultCode == PackageManager.PERMISSION_DENIED){
                     //user has picked never allow
 
-                    Log.d(TAG, "resolvePermissions: never allow disos kerreee!!!!!!");
+                    Log.d(TAG, "resolvePermissions: never allow dise -_-");
                     //TODO: show user dialog box then prompt user to go to settings and allow
                 }
 
@@ -164,10 +167,11 @@ public class Permission {
     }
 
 
-
     private void alertDialog(String message, DialogInterface.OnClickListener positiveListener,
                              DialogInterface.OnClickListener negativeListener)
     {
+        // show a alert dialog box with positive and negative listeners
+
         Log.d(TAG, "alertDialog: creating alert-box");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
