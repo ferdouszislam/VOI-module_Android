@@ -2,7 +2,7 @@ package com.example.voimoduleapp;
 
 import android.content.Context;
 
-public class CallPresenter implements VoiHandler.Master{
+public class CallPresenter implements VoiHandler.CallObserver, VoiHandler.CallClientSetupObserver{
 
     // view
     private CallView callView;
@@ -12,19 +12,23 @@ public class CallPresenter implements VoiHandler.Master{
 
     // models
     private boolean onCall = false;
-    private String username = "user"+(int)(Math.random()*100);
+    private String username;
 
-    public CallPresenter(CallView callView, Context context) {
+    public CallPresenter(CallView callView, VoiHandler voiHandler, String username) {
 
         this.callView = callView;
-        this.voiHandler = new SinchHandler(username, context, this);
+        this.voiHandler = voiHandler;
+        this.username = username;
+
+        voiHandler.setCallClientSetupObserver(this);
+        voiHandler.setCallObserver(this);
 
         callView.setUsernameUI(username);
     }
 
-    public void setupVoi(){
-        voiHandler.setUpClient();
-    }
+//    public void setupVoi(){
+//        voiHandler.setUpClient();
+//    }
 
     public void terminateVoi(){
         voiHandler.terminateClient();
@@ -92,4 +96,18 @@ public class CallPresenter implements VoiHandler.Master{
     }
 
 
+    @Override
+    public void onClientSetupDone() {
+
+    }
+
+    @Override
+    public void onClientStopped() {
+
+    }
+
+    @Override
+    public void onClientSetupFailed(String errorMessage) {
+
+    }
 }

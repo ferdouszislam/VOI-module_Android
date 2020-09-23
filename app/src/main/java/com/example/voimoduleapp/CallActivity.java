@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +25,11 @@ public class CallActivity extends AppCompatActivity implements CallView {
     private static final String TAG = "debug-main";
     // presenter
     private CallPresenter callPresenter;
+
+    private static VoiHandler VOI_HANDLER;
+    public static void setVoiHandler(VoiHandler voiHandler) {
+        CallActivity.VOI_HANDLER = voiHandler;
+    }
 
     // permissions
     private Permission permission;
@@ -55,8 +61,10 @@ public class CallActivity extends AppCompatActivity implements CallView {
         usernameTV = findViewById(R.id.usernameTextView);
         logMessagesTV = findViewById(R.id.logTextView);
 
+        String username = getIntent().getStringExtra("username");
+
         // set up presenter
-        callPresenter = new CallPresenter(this, this);
+        callPresenter = new CallPresenter(this, VOI_HANDLER, username);
         // callPresenter.setupVoi(); will get called on onResume()
 
         promptPermission();
@@ -91,20 +99,14 @@ public class CallActivity extends AppCompatActivity implements CallView {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        callPresenter.setupVoi();
-    }
+    protected void onDestroy() {
 
-    @Override
-    protected void onPause() {
-        super.onPause();
         callPresenter.terminateVoi();
+
+        super.onDestroy();
     }
 
     // methods from presenter
-
-
     @Override
     public void setUsernameUI(String username) {
         usernameTV.setText("username: "+username);
@@ -166,7 +168,9 @@ public class CallActivity extends AppCompatActivity implements CallView {
         callStateTV.setText("call connected with "+callerId+"! you can talk now.");
         callRecTI.setEnabled(false);
         callButton.setText("Hang Up");
-        callButton.setBackgroundColor(getColor(R.color.colorPrimary));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            callButton.setBackgroundColor(getColor(R.color.colorPrimary));
+        }
         callButton.setEnabled(true);
         callRecTI.setEnabled(false);
 
@@ -184,7 +188,9 @@ public class CallActivity extends AppCompatActivity implements CallView {
         callStateTV.setText("not on call (last call was disconnected)");
         callRecTI.setEnabled(true);
         callButton.setText("Call");
-        callButton.setBackgroundColor(getColor(R.color.colorAccent));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            callButton.setBackgroundColor(getColor(R.color.colorAccent));
+        }
 
     }
 
@@ -201,7 +207,7 @@ public class CallActivity extends AppCompatActivity implements CallView {
 
         showAlertDialog("An unexpected error occured! make sure you have active internet connection",
                     "", null, "", null);
-        //showToast("an unexpected error occured!");
+
         logMessagesTV.setText(message);
 
     }

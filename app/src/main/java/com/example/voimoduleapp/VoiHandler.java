@@ -2,7 +2,9 @@ package com.example.voimoduleapp;
 
 import com.sinch.android.rtc.calling.Call;
 
-public interface VoiHandler {
+import java.io.Serializable;
+
+public interface VoiHandler extends Serializable {
 
     void setUpClient();
     void terminateClient();
@@ -10,8 +12,19 @@ public interface VoiHandler {
     void hangUpCall();
     void answerIncomingCall();
 
+    void setCallClientSetupObserver(CallClientSetupObserver callClientSetupObserver);
+    void setCallObserver(CallObserver callObserver);
+
     // interface for class/presenter/activity who instantiated VoiHandler
-    interface Master{
+    interface CallClientSetupObserver extends Serializable {
+
+        void onClientSetupDone();
+        void onClientStopped();
+        void onClientSetupFailed(String errorMessage);
+
+    }
+
+    interface CallObserver extends Serializable {
 
         void onCallerCalling();
         void onCallConnected(String callerId);
@@ -21,7 +34,8 @@ public interface VoiHandler {
         void onSuccess(String message);
         void onFailed(String message);
 
-
     }
+
+
 
 }

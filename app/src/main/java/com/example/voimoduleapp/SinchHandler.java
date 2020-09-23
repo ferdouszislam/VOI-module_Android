@@ -19,9 +19,12 @@ import java.util.List;
 public class SinchHandler implements VoiHandler {
 
     private String TAG = "debug-client";
-    
-    // master: class/presenter/activity who instantiated SinchHandler
-    private Master master;
+
+    // observe client setup completion
+    private CallClientSetupObserver callClientSetupObserver;
+    // observe call events
+    private CallObserver callObserver;
+
     // activity/service etc
     private Context context;
     // my username
@@ -35,25 +38,35 @@ public class SinchHandler implements VoiHandler {
 
         @Override
         public void onClientStarted(SinchClient sinchClient) {
+
+            callClientSetupObserver.onClientSetupDone();
+
             isClientStarted = true;
             Log.d(TAG, "onClientStarted: client setup successful!");
         }
 
         @Override
         public void onClientStopped(SinchClient sinchClient) {
+
+            callClientSetupObserver.onClientStopped();
+
             isClientStarted = false;
             Log.d(TAG, "onClientStopped: client stopped!");
         }
 
         @Override
         public void onClientFailed(SinchClient sinchClient, SinchError sinchError) {
-            master.onFailed(sinchError.getMessage());
-            Log.d(TAG, "onClientFailed: client setup failed!!!");
+
+            callClientSetupObserver.onClientSetupFailed(sinchError.getMessage());
+
+            Log.d(TAG, "onClientFailed: client setup failed = "+sinchError.getMessage());
         }
 
         @Override
         public void onRegistrationCredentialsRequired(SinchClient sinchClient, ClientRegistration clientRegistration) {
-            master.onFailed("client registration failed. why?");
+
+            callClientSetupObserver.onClientSetupFailed("issue with client registration");
+
             Log.d(TAG, "onRegistrationCredentialsRequired: issue with client registration");
         }
 
@@ -70,24 +83,24 @@ public class SinchHandler implements VoiHandler {
         @Override
         public void onCallProgressing(Call call) {
             // Ringing... (called only from caller's end)
-            master.onCallerCalling();
+            callObserver.onCallerCalling();
         }
 
         @Override
         public void onCallEstablished(Call call) {
             // call connected
-            master.onSuccess("call succesfully connected!"); // hudai
+            callObserver.onSuccess("call successfully connected!"); // hudai
 
-            master.onCallConnected(call.getRemoteUserId());
+            callObserver.onCallConnected(call.getRemoteUserId());
 
         }
 
         @Override
         public void onCallEnded(Call call) {
             // call ended
-            master.onSuccess("call successfully disconnected.");
+            callObserver.onSuccess("call successfully disconnected.");
 
-            master.onCallDisconnected();
+            callObserver.onCallDisconnected();
         }
 
         @Override
@@ -101,15 +114,15 @@ public class SinchHandler implements VoiHandler {
         public void onIncomingCall(CallClient callClient, Call incomingCall) {
 
             SinchHandler.this.call = incomingCall;
-            master.onCallIncoming(incomingCall.getRemoteUserId());
+            callObserver.onCallIncoming(incomingCall.getRemoteUserId());
         }
     };
 
 
-    public SinchHandler(String myUsername,Context context, Master master){
-        //TODO: implement Singleton?
+    public SinchHandler(String myUsername,Context context, CallClientSetupObserver callClientSetupObserver){
+        // constructor has setup client observer only
 
-        this.master = master;
+        this.callClientSetupObserver = callClientSetupObserver;
         this.context = context;
         this.myUsername = myUsername;
 
@@ -161,7 +174,7 @@ public class SinchHandler implements VoiHandler {
     @Override
     public void callUser(String callReceipient) {
         if(!isClientStarted){
-            master.onFailed("call failed! client not started");
+            callObserver.onFailed("call failed! client not started");
             Log.d(TAG, "callUser: client not started!");
             return;
         }
@@ -173,7 +186,7 @@ public class SinchHandler implements VoiHandler {
     @Override
     public void answerIncomingCall() {
         if(call == null) {
-            master.onFailed("failed to answer incoming call! why?");
+            callObserver.onFailed("failed to answer incoming call! why?");
             Log.d(TAG, "answerIncomingCall: answering incoming call failed!");
             return;
         }
@@ -192,4 +205,13 @@ public class SinchHandler implements VoiHandler {
 
     }
 
+    @Override
+    public void setCallClientSetupObserver(CallClientSetupObserver callClientSetupObserver) {
+        this.callClientSetupObserver = callClientSetupObserver;
+    }
+
+    @Override
+    public void setCallObserver(CallObserver callObserver) {
+        this.callObserver = callObserver;
+    }
 }
