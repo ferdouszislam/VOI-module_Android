@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Permission {
+public class VoiPermission {
     // this class is for handling permissions
 
     private static final String TAG = "permission-debug";
@@ -28,7 +28,7 @@ public class Permission {
 
     private List<String> permissionsRequired = new ArrayList<>();
 
-    public Permission(Activity activity, String[] appPermissions, int PERMISSION_REQUEST_CODE) {
+    public VoiPermission(Activity activity, String[] appPermissions, int PERMISSION_REQUEST_CODE) {
         this.activity = activity;
         this.appPermissions = appPermissions;
         this.PERMISSION_REQUEST_CODE = PERMISSION_REQUEST_CODE;
@@ -118,7 +118,7 @@ public class Permission {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this.activity, permission)) {
                     //user denied collective permission once but hasn't picked never allow
 
-                    Permission.this.alertDialog(
+                    VoiPermission.this.alertDialog(
 
                             explanationMessage,
 
@@ -130,7 +130,7 @@ public class Permission {
 
                                     Log.d(TAG, "onClick: dialog.dismiss() called");
 
-                                    Permission.this.askSinglePermission(permission);
+                                    VoiPermission.this.askSinglePermission(permission);
                                     // Permission.this.checkPermissions();
                                     // Permission.this.askPermissions();
                                 }
@@ -143,7 +143,7 @@ public class Permission {
                                     dialog.dismiss();
                                     // terminate the app if permission is absolutely necessary
                                     if(isPermissionAbsolutelyNecessary)
-                                        Permission.this.activity.finish();
+                                        VoiPermission.this.activity.finish();
                                 }
                             }
 
