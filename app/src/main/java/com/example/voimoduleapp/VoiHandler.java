@@ -4,7 +4,7 @@ import com.sinch.android.rtc.calling.Call;
 
 import java.io.Serializable;
 
-public interface VoiHandler extends Serializable {
+public interface VoiHandler {
 
     void setUpClient();
     void terminateClient();
@@ -16,7 +16,7 @@ public interface VoiHandler extends Serializable {
     void setCallObserver(CallObserver callObserver);
 
     // interface for class/presenter/activity who instantiated VoiHandler
-    interface CallClientSetupObserver extends Serializable {
+    interface CallClientSetupObserver {
 
         void onClientSetupDone();
         void onClientStopped();
@@ -24,7 +24,7 @@ public interface VoiHandler extends Serializable {
 
     }
 
-    interface CallObserver extends Serializable {
+    interface CallObserver {
 
         void onCallerCalling();
         void onCallConnected(String callerId);
